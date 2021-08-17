@@ -40,7 +40,7 @@ db.run('CREATE TABLE IF NOT EXISTS log( req TEXT, mac TEXT, visits INTEGER, last
 
 
 app.get('/', function(request, response) {
-	response.sendFile(path.join(__dirname + '/login.html'));
+	response.sendFile(path.join(__dirname + '/views/login.html'));
 });
 
 app.use(function (req, res, next) {
@@ -92,7 +92,7 @@ app.get('/home', function(req,res){
         if (err) {
                   throw err;
         }
-        data +="<br/>dataaaa<table>"
+        data +="<table>"
         
         rows.forEach((row) => {
              console.log(row.name);
