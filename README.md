@@ -13,3 +13,8 @@ It will be better if you install forever to run app in background , to install f
 run app <code>forever start app.js</code> <br/>
 run radius <code>forever start server.js</code><br/>
 </p>
+
+<p>
+Default username "gm" <br/>
+Default password "Hitech" <br/>
+</p>
