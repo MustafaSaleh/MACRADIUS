@@ -1,0 +1,21 @@
+{
+    "name": "MACRadius",
+    "version": "1.0.0",
+    "description": "MACRadius",
+    "main": "server.js",
+    "author": {
+        "name": "Moustafa",
+        "email": "g-m123@hotmail.com"
+    },
+    "dependencies": {
+        "body-parser": "^1.19.0",
+        "cookie-parser": "^1.4.5",
+        "dgram": "^1.0.1",
+        "express": "^4.17.1",
+        "express-session": "^1.17.2",
+        "nodemon": "^2.0.12",
+        "pug": "^3.0.2",
+        "radius": "^1.1.3",
+        "sqlite3": "^5.0.2"
+    }
+}
