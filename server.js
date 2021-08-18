@@ -1,3 +1,4 @@
+require('dotenv').config()
 var radius = require('radius');
 var sqlite3 = require('sqlite3').verbose();
 var dgram = require("dgram");
@@ -5,7 +6,7 @@ var dgram = require("dgram");
 var db;
 
 function openDB(){
-    db = new sqlite3.Database('./database/users.db');
+    db = new sqlite3.Database(process.env.DBNAME);
 }
 
 function closeDB(){
@@ -73,7 +74,7 @@ RadiusServer.prototype.start = function () {
  
             // decode the radius packet
             var packet;
-
+            console.log(self.secret)
             
             try {
                 packet = radius.decode({ packet: msg, secret: self.secret });
@@ -101,7 +102,6 @@ RadiusServer.prototype.start = function () {
                       if(erro){
                         return console.error(erro.message);
                       }
-                      //res.send(` ID: ${row.ID},    Name: ${row.NAME} , Mac: ${row.Mac}`);
                       
                     if(row !== undefined){
                         responseCode = self.ACCESS_ACCEPT;
@@ -131,16 +131,6 @@ RadiusServer.prototype.start = function () {
                    
                  });
 
-
-                  /*
-                if (username == "test" && password == "test") {
-                    responseCode = self.ACCESS_ACCEPT;
-                }
-                */
-              
-
-                 
-
             }
         }
     });
@@ -153,5 +143,5 @@ RadiusServer.prototype.start = function () {
     self.server.bind(self.port);
 };
  
-var rServer = new RadiusServer({server: "0.0.0.0", port: 1645, secret: "MySecret" });
+var rServer = new RadiusServer({server: "0.0.0.0", port: process.env.RADIUS_PORT, secret: process.env.RADIUS_SECRET });
 rServer.start();
