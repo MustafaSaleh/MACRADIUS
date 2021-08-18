@@ -3,7 +3,7 @@
 <h4>Setup </h4>
 <ul>
     <li>You should have nodejs</li>
-    <li>Create database folder</li>
+    <li>Update .env file </li>
      <li>Run Command  <code>npm install</code></li>
      <li>Start App <code>node app.js</code></li>
      <li>Start Radius Server <code>node server.js</code></li>
@@ -14,7 +14,3 @@ run app <code>forever start app.js</code>
 run radius <code>forever start server.js</code> 
 </p>
 
-<p>
-Default username "gm" <br/>
-Default password "Hitech" <br/>
-</p>
