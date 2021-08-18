@@ -28,15 +28,15 @@ app.use(bodyParser.json());
 
 var server = http.createServer(app);
 const port = 4093
-var db = new sqlite3.Database('./database/users.db');
 
+var db
 
-db.run('CREATE TABLE IF NOT EXISTS users(id TEXT, name TEXT, mac TEXT)');
-//db.run('DROP TABLE log')
-db.run('CREATE TABLE IF NOT EXISTS log( req TEXT, mac TEXT, visits INTEGER, lastseen TEXT)');
-
-
-
+function openDB(){
+  db = new sqlite3.Database('./database/users.db');
+  db.run('CREATE TABLE IF NOT EXISTS users(id TEXT, name TEXT, mac TEXT)');
+  //db.run('DROP TABLE log')
+  db.run('CREATE TABLE IF NOT EXISTS log( req TEXT, mac TEXT, visits INTEGER, lastseen TEXT)');
+}
 
 
 app.get('/', function(request, response) {
@@ -65,7 +65,6 @@ app.get('/home', function(req,res){
     console.log(clients)
       res.render("home", { clients: clients });
       console.log("Entry displayed successfully");
-
     });
  
 });
@@ -208,6 +207,7 @@ app.get('/home', function(req,res){
         if (username =='gm' & password =="Hitech") {
           request.session.loggedin = true;
           request.session.username = username;
+          openDB()
           response.redirect('/home');
         } else {
           response.send('Incorrect Username and/or Password!');
@@ -222,8 +222,18 @@ app.get('/home', function(req,res){
 
 
   app.get('/logout', function(req, res){
-    req.session.destroy(null)
-    res.redirect("/"); //Inside a callback… bulletproof!
+    db.close((err) => {
+      if (err) {
+        console.log('There is some error in closing the database');
+        return console.error(err.message);
+      }else{
+        console.log('Closing the database connection.');
+        req.session.destroy(null)
+        res.redirect("/"); 
+      }
+      
+    });
+
    });
 
   app.listen(port, () => {

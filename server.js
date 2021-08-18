@@ -2,8 +2,22 @@ var radius = require('radius');
 var sqlite3 = require('sqlite3').verbose();
 var dgram = require("dgram");
 
-var db = new sqlite3.Database('./database/users.db');
+var db;
 
+function openDB(){
+    db = new sqlite3.Database('./database/users.db');
+}
+
+function closeDB(){
+    db.close((err) => {
+        if (err) {
+          console.log('There is some error in closing the database');
+        }else{
+          console.log('Closing the database connection.');
+
+        }
+      });
+}
  
 function saveLog(req,clientMAC){
 
@@ -17,13 +31,15 @@ function saveLog(req,clientMAC){
                             }
                             console.log("update visits for "+ row.mac+": " + row.visits++);
                             });
+                            closeDB();
                 }else{
                     db.run('INSERT INTO log(req,mac,visits,lastseen) VALUES(?,?,1, datetime("now"))', [req,clientMAC], function(err) {
                         if (err) {
                             console.log(err.message);
                         }
                             console.log("New user has been added");
-                        });
+                        })
+                        closeDB();
                    
                 }
                 
@@ -44,14 +60,15 @@ function RadiusServer(settings) {
     this.ACCESS_DENIED = 'Access-Reject';
     this.ACCESS_ACCEPT = 'Access-Accept';
 };
+
 RadiusServer.prototype.start = function () {
     var self = this;
-     
+  
     // create the UDP server
     self.server = dgram.createSocket("udp4");
      
     self.server.on('message', function (msg, rinfo) {
-     
+        openDB();
         if (msg && rinfo) {
  
             // decode the radius packet
@@ -111,6 +128,7 @@ RadiusServer.prototype.start = function () {
 
                          console.log('Access-Request for "' + username + '" (' + responseCode + ').');    
                     });
+                   
                  });
 
 
