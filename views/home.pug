@@ -4,7 +4,7 @@ html
         link(href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css", rel="stylesheet", integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC", crossorigin="anonymous" )
         link(href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css", rel="stylesheet")
       
-    body 
+    body
         div(class="container-fluid")
             nav.navbar.navbar-light.bg-light
                 a( href="#", class="navbar-brand mb-0 h1") Radius Mac Address
@@ -12,17 +12,22 @@ html
                 a(href="/log/del" class="nav-link") Clear Log
                 a(href="/logout") Logout
            
-            div(class="card")
-                div(class="card-body")
-                        h5(class="card-title ") Add Client
-                        form(action="add", method="post", id="newClient")
-                            div(class="row")
-                                div(class="col")
-                                    input(type="text", name="name", class="form-control", placeholder="Name", required="required") 
-                                div(class="col")  
-                                    input(type="text", name="mac", class="form-control",placeholder="Mac", minlength="12" ,maxlength="12", required="required") 
-                                button(type="submit", class="col") Submit
-
+            div(class="modal fade" id="addClientModel" tabindex="-1" aria-labelledby="addClientModelLabel" aria-hidden="true")
+                div(class="modal-dialog")
+                        div(class="modal-content")
+                            div(class="modal-header")
+                                h5(class="modal-title" id="addClientModelLabel") New Client
+                                button(type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close")
+                            div(class="modal-body")
+                                form(action="add", method="post", id="newClient")
+                                    div(class="row")
+                                        div(class="col")
+                                            input(type="text", name="name", class="form-control", placeholder="Name", required="required") 
+                                        div(class="col")  
+                                            input(id="newMacInput", type="text", name="mac", class="form-control",placeholder="Mac", minlength="12" ,maxlength="12", required="required") 
+                            div(class="modal-footer")
+                                button(type="submit", class="btn btn-primary", form="newClient") Submit
+            button(type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClientModel") Add New Client
             h4 Clients
             table(class="table table-striped", id="clientsTable")
                 thead
@@ -41,19 +46,60 @@ html
                         td= client.visits 
                         td= client.lastseen
 
+        div(aria-live="polite" aria-atomic="true" class="d-flex justify-content-center align-items-center w-100")
+            div(id="toastContainer" class="toast-container position-absolute top-0 end-0 p-3")
+        div(id="toastTemplate" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000" )
+            div(class="toast-header")
+                strong(class="me-auto") New Client
+                small 11 mins ago
+                button( type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close")
+            div(class="toast-body")
+                span(class="newMac")
+                button(type="button" class="toastBtn btn btn-primary btn-sm") Capture
+
+
 
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js")
     script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js", integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM", crossorigin="anonymous")
     script(src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js")
     script(src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js")
+    script(src="/socket.io/socket.io.js")
 
     script.
+        // data-bs-dismiss="toast"  data-bs-toggle="modal" data-bs-target="#addClientModel" id=""
+        var myModal = new bootstrap.Modal(document.getElementById('addClientModel'), {
+        keyboard: false
+        })
+        function updateMacInput(mac){
+            $("#"+mac).toast('hide')
+            $("#newMacInput").val(mac)
+            myModal.show();
+        }
+
         $(document).ready(function(){
+            var socket = io();
+            var toastCounter=1;
+            socket.on('newClient', function(msg) {
+                console.log(msg);
+                var t = $("#toastTemplate").clone();
+                    t.attr("id",msg);
+                    t.appendTo("#toastContainer");
+                    $("#"+msg+" .toast-body .newMac").html(msg);
+                    $("#"+msg+"  .toast-body button").attr( "onClick", "updateMacInput('"+msg+"')");
+                    $("#"+msg).toast('show')
+                    toastCounter++;
+            });
+
+            $(".toastBtn").click(function(){
+                
+            })
+
             $("#clientsTable").DataTable();
 
             $( "#newClient" ).submit(function( event ) {
                $.post( "/add",  $( "#newClient" ).serialize() )
                 .done(function( data ) {
+                    myModal.hide()
                     alert( "Data Loaded: " + data );
                 });
                 event.preventDefault();
