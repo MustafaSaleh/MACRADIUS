@@ -1,3 +1,4 @@
+require('dotenv').config()
 var sqlite3 = require('sqlite3').verbose();
 var express = require('express');
 const sessions = require('express-session');
@@ -13,7 +14,7 @@ const oneDay = 1000 * 60 * 60 * 24;
 
 //session middleware
 app.use(sessions({
-    secret: "thisismysecrctekeyfhrgfgrfrty84fwir767",
+    secret: process.env.SESSION_SECRET,
     saveUninitialized:true,
     cookie: { maxAge: oneDay },
     resave: false
@@ -32,7 +33,7 @@ const port = 4093
 var db
 
 function openDB(){
-  db = new sqlite3.Database('./database/users.db');
+  db = new sqlite3.Database(process.env.DBNAME);
   db.run('CREATE TABLE IF NOT EXISTS users(id TEXT, name TEXT, mac TEXT)');
   //db.run('DROP TABLE log')
   db.run('CREATE TABLE IF NOT EXISTS log( req TEXT, mac TEXT, visits INTEGER, lastseen TEXT)');
@@ -46,7 +47,7 @@ app.get('/', function(request, response) {
 app.use(function (req, res, next) {
   //console.log(req.url)
   //console.log(req.session)
-  if(req.url == '/auth' || req.url=='/'){
+  if(req.url == '/auth' || req.url == '/'){
     next()
   }
     if(req.session.loggedin == null){
@@ -202,22 +203,21 @@ app.get('/home', function(req,res){
   app.post('/auth', function(request, response) {
     var username = request.body.username;
     var password = request.body.password;
-    if (username && password) {
 
-        if (username =='gm' & password =="Hitech") {
+    if (username && password) {
+        if (username == process.env.USERNAME & password == process.env.PASSWORD ) {
           request.session.loggedin = true;
           request.session.username = username;
           openDB()
           response.redirect('/home');
         } else {
-          response.send('Incorrect Username and/or Password!');
+          console.log('Incorrect Username and/or Password!');
         }			
-        response.end();
-
     } else {
-      response.send('Please enter Username and Password!');
-      response.end();
+      console.log('Error Username and Password!');
     }
+
+    //response.redirect('/');
   });
 
 
