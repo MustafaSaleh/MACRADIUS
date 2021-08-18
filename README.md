@@ -1,5 +1,6 @@
 # MACRadius
 <p> This is simple radius server to auth wifi users by MAC address<p>
+<p>Thanks <a href="https://github.com/retailnext/node-radius"> node-radius </a></p>
 <h4>Setup </h4>
 <ul>
     <li>You should have nodejs</li>
