@@ -427,5 +427,5 @@ io.on('connection', (socket) => {
 
 
   server.listen(port, () => {
-    console.log(`Admin is running at http://yourip:${port}`)
+    console.log(`Admin is running at http://localhost:${port}`)
   })
