@@ -1,5 +1,6 @@
 # MACRadius
 <p> This is simple radius server to auth wifi users by MAC address<p>
+<p> this simple radius service customize to fit Meraki dashboard, it has web interface and you can host on your own server. then you can update your all devices MAC addresses or it will capture any device try to connect.<p>
 <p>Thanks <a href="https://github.com/retailnext/node-radius"> node-radius </a></p>
 <h4>Setup </h4>
 <ul>
@@ -38,3 +39,5 @@ run app <code>forever start app.js</code>
     
 </ul>
 
+
+<p> If you have any question send to me</p>
