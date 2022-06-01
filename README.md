@@ -4,7 +4,16 @@
 <h4>Setup </h4>
 <ul>
     <li>You should have nodejs</li>
-    <li>Update .env file </li>
+    <li>Update .env file 
+        <code>SESSION_SECRET=thisismysecrctekeyfhrgfgrfrty84fwir767
+        DBNAME=./database/users.db 
+        USERNAME=radius_admin 
+        PASSWORD=radius_password
+        RADIUS_PORT=1645 
+        RADIUS_SECRET=This_Secret_will_use_at_Meraki_Dashboard 
+        </code> 
+    </li>
+    <li>Create folder with name database if not available </li>
      <li>Run Command  <code>npm install</code></li>
      <li>Start App <code>node app.js</code></li>
 </ul>
