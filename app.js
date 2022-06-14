@@ -10,24 +10,39 @@ var express = require('express');
 const sessions = require('express-session');
 var bodyParser = require('body-parser');
 const cookieParser = require("cookie-parser");
+
+/// upload csv
+const fileUpload = require('express-fileupload');
+const cors = require('cors');
+const morgan = require('morgan');
+const _ = require('lodash');
+
+/// read csv
+const fs = require("fs");
+const { parse } = require("csv-parse");
+
 // create express app
 var app = express();
 var http = require('http')
 var path = require('path');
 
+// enable files upload
+app.use(fileUpload({
+  createParentPath: true
+}));
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(morgan('dev'));
 
 var server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
-
-
-const port = 4093
-
+const port = 4093;
 
 
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
-
 
 
 const oneDay = 1000 * 60 * 60 * 24;
@@ -67,6 +82,62 @@ function closeDB(){
     });
 }
 
+
+////
+app.post('/upload-csv', async (req, res) => {
+  try {
+      if(!req.files) {
+          res.send({
+              status: false,
+              message: 'No file uploaded'
+          });
+      } else {
+          //Use the name of the input field (i.e. "avatar") to retrieve the uploaded file
+          let filecsv = req.files.filecsv;
+          
+          //Use the mv() method to place the file in upload directory (i.e. "uploads")
+          filecsv.mv('./uploads/' + filecsv.name);
+          //send response
+          res.send({
+              status: true,
+              message: 'File is uploaded',
+              data: {
+                  name: filecsv.name,
+                  mimetype: filecsv.mimetype,
+                  size: filecsv.size
+              }
+          });
+         
+         setTimeout(function(){
+          updateDBwithCsv('./uploads/' + filecsv.name)
+         }, 3000);
+      }
+  } catch (err) {
+      res.status(500).send(err);
+  }
+});
+
+
+function updateDBwithCsv (file){
+  db = new sqlite3.Database(process.env.DBNAME);
+  fs.createReadStream(file)
+  .pipe(parse({ delimiter: ",", from_line: 2 }))
+  .on("data", function (row) {
+    db.serialize(function () {
+      db.run( 
+        `INSERT INTO users (name, mac) VALUES ( ? ,?)`,
+        [row[0], row[1]],
+        function (error) {
+          if (error) {
+            return console.log(error.message);
+          }
+          console.log(`Inserted a row with the id: ${this.lastID}`);
+        }
+      );
+    });
+  });
+ 
+}
 
 
 app.get('/', function(request, response) {

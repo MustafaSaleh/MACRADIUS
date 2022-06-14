@@ -27,7 +27,22 @@ html
                                             input(id="newMacInput", type="text", name="mac", class="form-control",placeholder="Mac", minlength="12" ,maxlength="12", required="required") 
                             div(class="modal-footer")
                                 button(type="submit", class="btn btn-primary", form="newClient") Submit
-            button(type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClientModel") Add New Client
+            div(class="modal fade" id="uploadCsvModel" tabindex="-1" aria-labelledby="uploadCsvModelLabel" aria-hidden="true")
+                div(class="modal-dialog")
+                        div(class="modal-content")
+                            div(class="modal-header")
+                                h5(class="modal-title" id="uploadCsvModelLabel") Upload Csv
+                                button(type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close")
+                            div(class="modal-body")
+                                form(action="upload-csv", method="post", id="csvFormId", enctype="multipart/form-data")
+                                    div(class="row")
+                                        div(class="col")  
+                                            input(id="filecsv", type="file", name="filecsv", class="form-control", required="required") 
+                            div(class="modal-footer")
+                                button(type="submit", class="btn btn-primary", form="csvFormId", id='uploadCsvBtn') Submit
+            div(class="btn-group " role="group" aria-label="Basic example")
+                button(type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClientModel") Add New Client
+                button(type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadCsvModel") Upload Csv
             h4 Clients
             table(class="table table-striped", id="clientsTable")
                 thead
@@ -37,14 +52,16 @@ html
                         th Mac
                         th Visits 
                         th Last Seen 
+                        th Delete 
                 each client in clients
                     tr
-                        td 
-                            a(href=`del/${client.rowid}`, class="delClient")=client.rowid
+                        td=client.rowid
                         td= client.name
                         td= client.mac
                         td= client.visits 
                         td= client.lastseen
+                        td 
+                            a(href=`del/${client.rowid}`, class="delClient")= 'delete'
 
         div(aria-live="polite" aria-atomic="true" class="d-flex justify-content-center align-items-center w-100")
             div(id="toastContainer" class="toast-container position-absolute top-0 end-0 p-3")
@@ -69,12 +86,22 @@ html
         // data-bs-dismiss="toast"  data-bs-toggle="modal" data-bs-target="#addClientModel" id=""
         var myModal = new bootstrap.Modal(document.getElementById('addClientModel'), {
         keyboard: false
-        })
+        });
+
         function updateMacInput(mac){
             $("#"+mac).toast('hide')
             $("#newMacInput").val(mac)
             myModal.show();
         }
+
+        var myModalCsv = new bootstrap.Modal(document.getElementById('uploadCsvModel'), {
+        keyboard: false
+        });
+        
+        function uploadCsc(mac){
+            myModalCsv.show();
+        }
+
 
         $(document).ready(function(){
             var socket = io();
@@ -90,20 +117,38 @@ html
                     toastCounter++;
             });
 
-            $(".toastBtn").click(function(){
-                
-            })
-
-            $("#clientsTable").DataTable();
+            $("#clientsTable").DataTable( );
 
             $( "#newClient" ).submit(function( event ) {
                $.post( "/add",  $( "#newClient" ).serialize() )
                 .done(function( data ) {
                     myModal.hide()
                     alert( "Data Loaded: " + data );
+                     location.reload(true);
                 });
                 event.preventDefault();
             });
+
+            $( "#uploadCsvBtn" ).click(function( event ) {
+                    event.preventDefault();
+                    var form = this.form;
+                    var data = new FormData(form);
+                    var url = form.action;
+                    $.ajax({
+                        type: 'POST',
+                        url: 'upload-csv',
+                        data: data,
+                        processData: false,
+                        contentType: false
+                    }).done(function( data ) {
+                        myModalCsv.hide()
+                         alert( "Data Loaded: " + data.message );
+                        
+                     });
+               
+            });
+
+
             $(".delClient").click(function(){
                  event.preventDefault();
                 $.get( $(this).attr('href'), function( data ) {
