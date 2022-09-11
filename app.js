@@ -66,7 +66,7 @@ var db = openDB();
 
 function openDB(){
   db = new sqlite3.Database(process.env.DBNAME);
-  db.run('CREATE TABLE IF NOT EXISTS users(id TEXT, name TEXT, mac TEXT)');
+  db.run('CREATE TABLE IF NOT EXISTS users(id TEXT , name TEXT, mac TEXT NOT NULL UNIQUE)');
   //db.run('DROP TABLE log')
   db.run('CREATE TABLE IF NOT EXISTS log( req TEXT, mac TEXT, visits INTEGER, lastseen TEXT)');
 }
@@ -193,6 +193,7 @@ app.get('/home', function(req,res){
         if (err) {
                   throw err;
         }
+        /*
         data +="<table>"
         
         rows.forEach((row) => {             
@@ -200,10 +201,10 @@ app.get('/home', function(req,res){
 
         });
         data +="</table>";
-
-        res.send(data);
+        */
+        //res.send(data);
         console.log("logs successfully");
-
+        res.render("log", { logsdata: rows });
         
         });
 
@@ -235,6 +236,7 @@ app.get('/home', function(req,res){
     db.serialize(()=>{
       db.run('INSERT INTO users(name,mac) VALUES(?,?)', [ req.body.name,req.body.mac], function(err) {
         if (err) {
+          res.send("dublicate");
           return console.log(err.message);
         }
         console.log("New user has been added");
